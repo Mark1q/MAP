@@ -2,6 +2,7 @@ package model.adt;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import exception.MyException;
 
 public class MyDictionary<K, V> implements MyIDictionary<K, V> {
@@ -25,10 +26,20 @@ public class MyDictionary<K, V> implements MyIDictionary<K, V> {
         dictionary.put(key, value);
     }
 
+    public void remove(K key) throws MyException {
+        if (!dictionary.containsKey(key))
+            throw new MyException("Key " + key + " is not defined");
+        dictionary.remove(key);
+    }
+
+    public Set<K> keySet() {
+        return dictionary.keySet();
+    }
+
     public String toString() {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<K, V> entry : dictionary.entrySet()) {
-            sb.append(entry.getKey()).append(" -> ").append(entry.getValue()).append("\n");
+            sb.append(entry.getKey()).append(" --> ").append(entry.getValue()).append("\n");
         }
         return sb.toString();
     }

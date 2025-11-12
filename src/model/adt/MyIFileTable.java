@@ -1,13 +1,11 @@
 package model.adt;
 import exception.MyException;
-import java.util.Set;
+import java.io.BufferedReader;
 
-public interface MyIDictionary<K, V> {
+public interface MyIFileTable<K, V> {
     void put(K key, V value);
     V lookup(K key) throws MyException;
     boolean isDefined(K key);
-    void update(K key, V value) throws MyException;
     void remove(K key) throws MyException;
-    Set<K> keySet();
     String toString();
 }

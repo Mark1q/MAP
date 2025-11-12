@@ -10,4 +10,11 @@ public class BoolValue implements Value{
     public boolean getVal() { return val; }
     public Type getType() { return new BoolType(); }
     public String toString() { return String.valueOf(val); }
+
+    @Override
+    public boolean equals(Object another) {
+        if (!(another instanceof BoolValue))
+            return false;
+        return ((BoolValue) another).getVal() == this.val;
+    }
 }

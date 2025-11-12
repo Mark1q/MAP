@@ -4,8 +4,6 @@ import model.PrgState;
 import exception.MyException;
 import model.type.BoolType;
 import model.type.IntType;
-import model.value.BoolValue;
-import model.value.IntValue;
 import model.value.Value;
 import model.adt.MyIDictionary;
 import model.type.Type;
@@ -27,10 +25,7 @@ public class VarDeclStmt implements IStmt {
         if (symTbl.isDefined(name))
             throw new MyException("Variable " + name + " is already declared");
 
-        if (typ.equals(new IntType()))
-            symTbl.put(name, new IntValue(0));
-        else if (typ.equals(new BoolType()))
-            symTbl.put(name, new BoolValue(false));
+        symTbl.put(name, typ.defaultValue());
 
         return state;
     }

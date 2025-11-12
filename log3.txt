@@ -1,0 +1,178 @@
+ExeStack:
+(string varf; (varf = test.in; (openRFile(varf); (int varc; (readFile(varf,varc); (print(varc); (readFile(varf,varc); (print(varc); closeRFile(varf)))))))))
+SymTable:
+Out:
+FileTable:
+========================================
+
+ExeStack:
+string varf
+(varf = test.in; (openRFile(varf); (int varc; (readFile(varf,varc); (print(varc); (readFile(varf,varc); (print(varc); closeRFile(varf))))))))
+SymTable:
+Out:
+FileTable:
+========================================
+
+ExeStack:
+(varf = test.in; (openRFile(varf); (int varc; (readFile(varf,varc); (print(varc); (readFile(varf,varc); (print(varc); closeRFile(varf))))))))
+SymTable:
+varf --> 
+Out:
+FileTable:
+========================================
+
+ExeStack:
+varf = test.in
+(openRFile(varf); (int varc; (readFile(varf,varc); (print(varc); (readFile(varf,varc); (print(varc); closeRFile(varf)))))))
+SymTable:
+varf --> 
+Out:
+FileTable:
+========================================
+
+ExeStack:
+(openRFile(varf); (int varc; (readFile(varf,varc); (print(varc); (readFile(varf,varc); (print(varc); closeRFile(varf)))))))
+SymTable:
+varf --> test.in
+Out:
+FileTable:
+========================================
+
+ExeStack:
+openRFile(varf)
+(int varc; (readFile(varf,varc); (print(varc); (readFile(varf,varc); (print(varc); closeRFile(varf))))))
+SymTable:
+varf --> test.in
+Out:
+FileTable:
+========================================
+
+ExeStack:
+(int varc; (readFile(varf,varc); (print(varc); (readFile(varf,varc); (print(varc); closeRFile(varf))))))
+SymTable:
+varf --> test.in
+Out:
+FileTable:
+test.in
+========================================
+
+ExeStack:
+int varc
+(readFile(varf,varc); (print(varc); (readFile(varf,varc); (print(varc); closeRFile(varf)))))
+SymTable:
+varf --> test.in
+Out:
+FileTable:
+test.in
+========================================
+
+ExeStack:
+(readFile(varf,varc); (print(varc); (readFile(varf,varc); (print(varc); closeRFile(varf)))))
+SymTable:
+varf --> test.in
+varc --> 0
+Out:
+FileTable:
+test.in
+========================================
+
+ExeStack:
+readFile(varf,varc)
+(print(varc); (readFile(varf,varc); (print(varc); closeRFile(varf))))
+SymTable:
+varf --> test.in
+varc --> 0
+Out:
+FileTable:
+test.in
+========================================
+
+ExeStack:
+(print(varc); (readFile(varf,varc); (print(varc); closeRFile(varf))))
+SymTable:
+varf --> test.in
+varc --> 120
+Out:
+FileTable:
+test.in
+========================================
+
+ExeStack:
+print(varc)
+(readFile(varf,varc); (print(varc); closeRFile(varf)))
+SymTable:
+varf --> test.in
+varc --> 120
+Out:
+FileTable:
+test.in
+========================================
+
+ExeStack:
+(readFile(varf,varc); (print(varc); closeRFile(varf)))
+SymTable:
+varf --> test.in
+varc --> 120
+Out:
+120
+FileTable:
+test.in
+========================================
+
+ExeStack:
+readFile(varf,varc)
+(print(varc); closeRFile(varf))
+SymTable:
+varf --> test.in
+varc --> 120
+Out:
+120
+FileTable:
+test.in
+========================================
+
+ExeStack:
+(print(varc); closeRFile(varf))
+SymTable:
+varf --> test.in
+varc --> 230
+Out:
+120
+FileTable:
+test.in
+========================================
+
+ExeStack:
+print(varc)
+closeRFile(varf)
+SymTable:
+varf --> test.in
+varc --> 230
+Out:
+120
+FileTable:
+test.in
+========================================
+
+ExeStack:
+closeRFile(varf)
+SymTable:
+varf --> test.in
+varc --> 230
+Out:
+120
+230
+FileTable:
+test.in
+========================================
+
+ExeStack:
+SymTable:
+varf --> test.in
+varc --> 230
+Out:
+120
+230
+FileTable:
+========================================
+
