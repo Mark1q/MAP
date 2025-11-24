@@ -18,13 +18,15 @@ public class IfStmt implements IStmt {
         this.elseS = elseS;
     }
 
+    @Override
     public String toString() {
         return "(IF(" + exp.toString() + ") THEN(" + thenS.toString() +
                 ") ELSE(" + elseS.toString() + "))";
     }
 
+    @Override
     public PrgState execute(PrgState state) throws MyException {
-        Value condition = exp.eval(state.getSymTable());
+        Value condition = exp.eval(state.getSymTable(), state.getHeap());
 
         if (!condition.getType().equals(new BoolType()))
             throw new MyException("Condition is not a boolean");

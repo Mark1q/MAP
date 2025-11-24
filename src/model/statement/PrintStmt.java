@@ -9,13 +9,19 @@ import model.adt.MyIList;
 public class PrintStmt implements IStmt {
     private Exp exp;
 
-    public PrintStmt(Exp exp) { this.exp = exp; }
+    public PrintStmt(Exp exp) {
+        this.exp = exp;
+    }
 
-    public String toString() { return "print(" + exp.toString() + ")"; }
+    @Override
+    public String toString() {
+        return "print(" + exp.toString() + ")";
+    }
 
+    @Override
     public PrgState execute(PrgState state) throws MyException {
         MyIList<Value> out = state.getOut();
-        Value val = exp.eval(state.getSymTable());
+        Value val = exp.eval(state.getSymTable(), state.getHeap());
         out.add(val);
         return state;
     }

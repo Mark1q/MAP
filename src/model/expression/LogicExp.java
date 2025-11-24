@@ -5,11 +5,12 @@ import model.value.Value;
 import model.value.BoolValue;
 import model.type.BoolType;
 import model.adt.MyIDictionary;
+import model.adt.MyIHeap;
 
 public class LogicExp implements Exp {
     private Exp e1;
     private Exp e2;
-    private String op; // "and", "or"
+    private String op;
 
     public LogicExp(String op, Exp e1, Exp e2) {
         this.op = op;
@@ -17,12 +18,13 @@ public class LogicExp implements Exp {
         this.e2 = e2;
     }
 
-    public Value eval(MyIDictionary<String, Value> tbl) throws MyException {
-        Value v1 = e1.eval(tbl);
+    @Override
+    public Value eval(MyIDictionary<String, Value> tbl, MyIHeap<Integer, Value> heap) throws MyException {
+        Value v1 = e1.eval(tbl, heap);
         if (!v1.getType().equals(new BoolType()))
             throw new MyException("First operand is not a boolean");
 
-        Value v2 = e2.eval(tbl);
+        Value v2 = e2.eval(tbl, heap);
         if (!v2.getType().equals(new BoolType()))
             throw new MyException("Second operand is not a boolean");
 
@@ -39,6 +41,7 @@ public class LogicExp implements Exp {
             throw new MyException("Invalid logical operator");
     }
 
+    @Override
     public String toString() {
         return e1.toString() + " " + op + " " + e2.toString();
     }

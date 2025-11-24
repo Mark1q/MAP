@@ -8,34 +8,52 @@ import exception.MyException;
 public class MyDictionary<K, V> implements MyIDictionary<K, V> {
     private HashMap<K, V> dictionary;
 
-    public MyDictionary() { dictionary = new HashMap<>(); }
+    public MyDictionary() {
+        dictionary = new HashMap<>();
+    }
 
-    public void put(K key, V value) { dictionary.put(key, value); }
+    @Override
+    public void put(K key, V value) {
+        dictionary.put(key, value);
+    }
 
+    @Override
     public V lookup(K key) throws MyException {
         if (!dictionary.containsKey(key))
             throw new MyException("Variable " + key + " is not defined");
         return dictionary.get(key);
     }
 
-    public boolean isDefined(K key) { return dictionary.containsKey(key); }
+    @Override
+    public boolean isDefined(K key) {
+        return dictionary.containsKey(key);
+    }
 
+    @Override
     public void update(K key, V value) throws MyException {
         if (!dictionary.containsKey(key))
             throw new MyException("Variable " + key + " is not defined");
         dictionary.put(key, value);
     }
 
+    @Override
     public void remove(K key) throws MyException {
         if (!dictionary.containsKey(key))
             throw new MyException("Key " + key + " is not defined");
         dictionary.remove(key);
     }
 
+    @Override
     public Set<K> keySet() {
         return dictionary.keySet();
     }
 
+    @Override
+    public Map<K, V> getContent() {
+        return dictionary;
+    }
+
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<K, V> entry : dictionary.entrySet()) {

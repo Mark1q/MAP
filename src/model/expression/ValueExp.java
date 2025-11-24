@@ -2,16 +2,23 @@ package model.expression;
 
 import model.value.Value;
 import model.adt.MyIDictionary;
+import model.adt.MyIHeap;
 import exception.MyException;
 
 public class ValueExp implements Exp {
     private Value e;
 
-    public ValueExp(Value e) { this.e = e; }
+    public ValueExp(Value e) {
+        this.e = e;
+    }
 
-    public Value eval(MyIDictionary<String, Value> tbl) throws MyException {
+    @Override
+    public Value eval(MyIDictionary<String, Value> tbl, MyIHeap<Integer, Value> heap) throws MyException {
         return e;
     }
 
-    public String toString() { return e.toString(); }
+    @Override
+    public String toString() {
+        return e.toString();
+    }
 }

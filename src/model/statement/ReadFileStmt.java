@@ -1,4 +1,5 @@
 package model.statement;
+
 import model.PrgState;
 import model.expression.Exp;
 import model.value.Value;
@@ -19,8 +20,12 @@ public class ReadFileStmt implements IStmt {
         this.varName = varName;
     }
 
-    public String toString() { return "readFile(" + exp.toString() + "," + varName + ")"; }
+    @Override
+    public String toString() {
+        return "readFile(" + exp.toString() + "," + varName + ")";
+    }
 
+    @Override
     public PrgState execute(PrgState state) throws MyException {
         if (!state.getSymTable().isDefined(varName))
             throw new MyException("Variable " + varName + " is not defined");
@@ -29,7 +34,7 @@ public class ReadFileStmt implements IStmt {
         if (!varVal.getType().equals(new IntType()))
             throw new MyException("Variable " + varName + " is not of type int");
 
-        Value val = exp.eval(state.getSymTable());
+        Value val = exp.eval(state.getSymTable(), state.getHeap());
         if (!val.getType().equals(new StringType()))
             throw new MyException("Expression is not a string");
 

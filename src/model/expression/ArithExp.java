@@ -3,13 +3,14 @@ package model.expression;
 import model.value.Value;
 import model.value.IntValue;
 import model.adt.MyIDictionary;
+import model.adt.MyIHeap;
 import model.type.IntType;
 import exception.MyException;
 
 public class ArithExp implements Exp {
     private Exp e1;
     private Exp e2;
-    private char op; // '+', '-', '*', '/'
+    private char op;
 
     public ArithExp(char op, Exp e1, Exp e2) {
         this.op = op;
@@ -17,12 +18,13 @@ public class ArithExp implements Exp {
         this.e2 = e2;
     }
 
-    public Value eval(MyIDictionary<String, Value> tbl) throws MyException {
-        Value v1 = e1.eval(tbl);
+    @Override
+    public Value eval(MyIDictionary<String, Value> tbl, MyIHeap<Integer, Value> heap) throws MyException {
+        Value v1 = e1.eval(tbl, heap);
         if (!v1.getType().equals(new IntType()))
             throw new MyException("First operand is not an integer");
 
-        Value v2 = e2.eval(tbl);
+        Value v2 = e2.eval(tbl, heap);
         if (!v2.getType().equals(new IntType()))
             throw new MyException("Second operand is not an integer");
 
@@ -44,6 +46,7 @@ public class ArithExp implements Exp {
         }
     }
 
+    @Override
     public String toString() {
         return e1.toString() + " " + op + " " + e2.toString();
     }

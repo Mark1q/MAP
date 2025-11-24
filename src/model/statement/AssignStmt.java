@@ -17,8 +17,12 @@ public class AssignStmt implements IStmt {
         this.exp = exp;
     }
 
-    public String toString() { return id + " = " + exp.toString(); }
+    @Override
+    public String toString() {
+        return id + " = " + exp.toString();
+    }
 
+    @Override
     public PrgState execute(PrgState state) throws MyException {
         MyIStack<IStmt> stk = state.getStk();
         MyIDictionary<String, Value> symTbl = state.getSymTable();
@@ -26,7 +30,7 @@ public class AssignStmt implements IStmt {
         if (!symTbl.isDefined(id))
             throw new MyException("Variable " + id + " was not declared");
 
-        Value val = exp.eval(symTbl);
+        Value val = exp.eval(symTbl, state.getHeap());
         Type typId = symTbl.lookup(id).getType();
 
         if (!val.getType().equals(typId))

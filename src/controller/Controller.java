@@ -4,7 +4,12 @@ import exception.MyException;
 import model.PrgState;
 import model.adt.MyIStack;
 import model.statement.IStmt;
+import model.value.RefValue;
+import model.value.Value;
 import repository.IRepository;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Controller {
     private IRepository repo;
@@ -24,16 +29,58 @@ public class Controller {
         crtStmt.execute(state);
     }
 
+    // Safe garbage collector that considers heap references
+    private Map<Integer, Value> safeGarbageCollector(List<Integer> symTableAddr, Map<Integer, Value> heap) {
+        // Get all reachable addresses (from symTable and heap)
+        Set<Integer> reachableAddresses = new HashSet<>(symTableAddr);
+        boolean changed = true;
+
+        // Keep adding addresses referenced from heap until no new addresses are found
+        while (changed) {
+            changed = false;
+            List<Integer> newAddresses = heap.entrySet().stream()
+                    .filter(e -> reachableAddresses.contains(e.getKey()))
+                    .map(Map.Entry::getValue)
+                    .filter(v -> v instanceof RefValue)
+                    .map(v -> ((RefValue) v).getAddr())
+                    .filter(addr -> !reachableAddresses.contains(addr))
+                    .collect(Collectors.toList());
+
+            if (!newAddresses.isEmpty()) {
+                reachableAddresses.addAll(newAddresses);
+                changed = true;
+            }
+        }
+
+        // Keep only reachable addresses
+        return heap.entrySet().stream()
+                .filter(e -> reachableAddresses.contains(e.getKey()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    private List<Integer> getAddrFromSymTable(Collection<Value> symTableValues) {
+        return symTableValues.stream()
+                .filter(v -> v instanceof RefValue)
+                .map(v -> {
+                    RefValue v1 = (RefValue) v;
+                    return v1.getAddr();
+                })
+                .collect(Collectors.toList());
+    }
+
     public void allStep() throws MyException {
         PrgState prg = repo.getCrtPrg();
-        repo.logPrgStateExec();  // Log initial state
+        repo.logPrgStateExec();
 
         if (displayFlag)
             System.out.println(prg.toString());
 
         while (!prg.getStk().isEmpty()) {
             oneStep(prg);
-            repo.logPrgStateExec();  // Log after each step
+            prg.getHeap().setContent(safeGarbageCollector(
+                    getAddrFromSymTable(prg.getSymTable().getContent().values()),
+                    prg.getHeap().getContent()));
+            repo.logPrgStateExec();
             if (displayFlag)
                 System.out.println(prg.toString());
         }

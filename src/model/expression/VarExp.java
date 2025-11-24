@@ -2,16 +2,23 @@ package model.expression;
 
 import model.value.Value;
 import model.adt.MyIDictionary;
+import model.adt.MyIHeap;
 import exception.MyException;
 
 public class VarExp implements Exp {
     private String id;
 
-    public VarExp(String id) { this.id = id; }
+    public VarExp(String id) {
+        this.id = id;
+    }
 
-    public Value eval(MyIDictionary<String, Value> tbl) throws MyException {
+    @Override
+    public Value eval(MyIDictionary<String, Value> tbl, MyIHeap<Integer, Value> heap) throws MyException {
         return tbl.lookup(id);
     }
 
-    public String toString() { return id; }
+    @Override
+    public String toString() {
+        return id;
+    }
 }
