@@ -1,8 +1,10 @@
 package model.statement;
 
 import model.PrgState;
+import model.adt.MyIDictionary;
 import model.expression.Exp;
 import model.type.RefType;
+import model.type.Type;
 import model.value.Value;
 import model.value.RefValue;
 import exception.MyException;
@@ -35,6 +37,16 @@ public class NewStmt implements IStmt {
         state.getSymTable().update(varName, new RefValue(newAddress, refValue.getLocationType()));
 
         return null;
+    }
+
+    @Override
+    public MyIDictionary<String, Type> typecheck(MyIDictionary<String, Type> typeEnv) throws MyException {
+        Type typevar = typeEnv.lookup(varName);
+        Type typexp = expression.typecheck(typeEnv);
+        if (typevar.equals(new RefType(typexp)))
+            return typeEnv;
+        else
+            throw new MyException("NEW stmt: right hand side and left hand side have different types");
     }
 
     @Override

@@ -3,6 +3,8 @@ package model.statement;
 import exception.MyException;
 import model.PrgState;
 import model.adt.MyIStack;
+import model.adt.MyIDictionary;
+import model.type.Type;
 
 public class CompStmt implements IStmt {
     private IStmt first;
@@ -21,5 +23,10 @@ public class CompStmt implements IStmt {
         state.getStk().push(snd);
         state.getStk().push(first);
         return null;
+    }
+
+    @Override
+    public MyIDictionary<String, Type> typecheck(MyIDictionary<String, Type> typeEnv) throws MyException {
+        return snd.typecheck(first.typecheck(typeEnv));
     }
 }

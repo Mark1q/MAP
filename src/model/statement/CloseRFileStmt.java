@@ -1,10 +1,12 @@
 package model.statement;
 
 import model.PrgState;
+import model.adt.MyIDictionary;
 import model.expression.Exp;
 import model.value.Value;
 import model.value.StringValue;
 import model.type.StringType;
+import model.type.Type;
 import exception.MyException;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -39,5 +41,14 @@ public class CloseRFileStmt implements IStmt {
         }
 
         return null;
+    }
+
+    @Override
+    public MyIDictionary<String, Type> typecheck(MyIDictionary<String, Type> typeEnv) throws MyException {
+        Type typ = exp.typecheck(typeEnv);
+        if (typ.equals(new StringType()))
+            return typeEnv;
+        else
+            throw new MyException("CloseRFile: expression is not a string");
     }
 }

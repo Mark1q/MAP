@@ -8,8 +8,26 @@ import model.value.*;
 import repository.IRepository;
 import repository.Repository;
 import view.*;
+import exception.MyException;
 
 public class Main {
+
+    private static Controller createController(IStmt program, String logFile) {
+        try {
+            MyIDictionary<String, Type> typeEnv = new MyDictionary<>();
+            program.typecheck(typeEnv);
+            System.out.println("Program passed type checking!");
+
+            PrgState prgState = new PrgState(new MyStack<>(), new MyDictionary<>(),
+                    new MyList<>(), new MyFileTable<>(), new MyHeap<>(), program);
+            IRepository repo = new Repository(prgState, logFile);
+            return new Controller(repo);
+        } catch (MyException e) {
+            System.out.println("Type check error: " + e.getMessage());
+            return null;
+        }
+    }
+
     public static void main(String[] args) {
         // Example 1: int v; v=2; Print(v)
         IStmt ex1 = new CompStmt(
@@ -19,10 +37,7 @@ public class Main {
                         new PrintStmt(new VarExp("v"))
                 )
         );
-        PrgState prg1 = new PrgState(new MyStack<>(), new MyDictionary<>(), new MyList<>(),
-                new MyFileTable<>(), new MyHeap<>(), ex1);
-        IRepository repo1 = new Repository(prg1, "log1.txt");
-        Controller ctr1 = new Controller(repo1);
+        Controller ctr1 = createController(ex1, "log1.txt");
 
         // Example 2: int a; int b; a=2+3*5; b=a+1; Print(b)
         IStmt ex2 = new CompStmt(
@@ -39,10 +54,7 @@ public class Main {
                         )
                 )
         );
-        PrgState prg2 = new PrgState(new MyStack<>(), new MyDictionary<>(), new MyList<>(),
-                new MyFileTable<>(), new MyHeap<>(), ex2);
-        IRepository repo2 = new Repository(prg2, "log2.txt");
-        Controller ctr2 = new Controller(repo2);
+        Controller ctr2 = createController(ex2, "log2.txt");
 
         // Example 3: File operations test
         IStmt ex3 = new CompStmt(
@@ -70,10 +82,7 @@ public class Main {
                         )
                 )
         );
-        PrgState prg3 = new PrgState(new MyStack<>(), new MyDictionary<>(), new MyList<>(),
-                new MyFileTable<>(), new MyHeap<>(), ex3);
-        IRepository repo3 = new Repository(prg3, "log3.txt");
-        Controller ctr3 = new Controller(repo3);
+        Controller ctr3 = createController(ex3, "log3.txt");
 
         // Example 4: Ref int v;new(v,20);Ref Ref int a; new(a,v);print(rH(v));print(rH(rH(a))+5)
         IStmt ex4 = new CompStmt(
@@ -94,10 +103,7 @@ public class Main {
                         )
                 )
         );
-        PrgState prg4 = new PrgState(new MyStack<>(), new MyDictionary<>(), new MyList<>(),
-                new MyFileTable<>(), new MyHeap<>(), ex4);
-        IRepository repo4 = new Repository(prg4, "log4.txt");
-        Controller ctr4 = new Controller(repo4);
+        Controller ctr4 = createController(ex4, "log4.txt");
 
         // Example 5: Ref int v;new(v,20);print(rH(v)); wH(v,30);print(rH(v)+5);
         IStmt ex5 = new CompStmt(
@@ -115,10 +121,7 @@ public class Main {
                         )
                 )
         );
-        PrgState prg5 = new PrgState(new MyStack<>(), new MyDictionary<>(), new MyList<>(),
-                new MyFileTable<>(), new MyHeap<>(), ex5);
-        IRepository repo5 = new Repository(prg5, "log5.txt");
-        Controller ctr5 = new Controller(repo5);
+        Controller ctr5 = createController(ex5, "log5.txt");
 
         // Example 6: int v; v=4; (while (v>0) print(v);v=v-1);print(v)
         IStmt ex6 = new CompStmt(
@@ -137,10 +140,7 @@ public class Main {
                         )
                 )
         );
-        PrgState prg6 = new PrgState(new MyStack<>(), new MyDictionary<>(), new MyList<>(),
-                new MyFileTable<>(), new MyHeap<>(), ex6);
-        IRepository repo6 = new Repository(prg6, "log6.txt");
-        Controller ctr6 = new Controller(repo6);
+        Controller ctr6 = createController(ex6, "log6.txt");
 
         // Example 7: Garbage collector test - Ref int v;new(v,20);Ref Ref int a; new(a,v); new(v,30);print(rH(rH(a)))
         IStmt ex7 = new CompStmt(
@@ -159,10 +159,7 @@ public class Main {
                         )
                 )
         );
-        PrgState prg7 = new PrgState(new MyStack<>(), new MyDictionary<>(), new MyList<>(),
-                new MyFileTable<>(), new MyHeap<>(), ex7);
-        IRepository repo7 = new Repository(prg7, "log7.txt");
-        Controller ctr7 = new Controller(repo7);
+        Controller ctr7 = createController(ex7, "log7.txt");
 
         // Example 8:
         // int v; Ref int a; v=10;new(a,22);
@@ -198,21 +195,18 @@ public class Main {
                         )
                 )
         );
-        PrgState prg8 = new PrgState(new MyStack<>(), new MyDictionary<>(), new MyList<>(),
-                new MyFileTable<>(), new MyHeap<>(), ex8);
-        IRepository repo8 = new Repository(prg8, "log8.txt");
-        Controller ctr8 = new Controller(repo8);
+        Controller ctr8 = createController(ex8, "log8.txt");
 
         TextMenu menu = new TextMenu();
         menu.addCommand(new ExitCommand("0", "exit"));
-        menu.addCommand(new RunExampleCommand("1", ex1.toString(), ctr1));
-        menu.addCommand(new RunExampleCommand("2", ex2.toString(), ctr2));
-        menu.addCommand(new RunExampleCommand("3", ex3.toString(), ctr3));
-        menu.addCommand(new RunExampleCommand("4", ex4.toString(), ctr4));
-        menu.addCommand(new RunExampleCommand("5", ex5.toString(), ctr5));
-        menu.addCommand(new RunExampleCommand("6", ex6.toString(), ctr6));
-        menu.addCommand(new RunExampleCommand("7", ex7.toString(), ctr7));
-        menu.addCommand(new RunExampleCommand("8", ex8.toString(), ctr8));
+        if (ctr1 != null) menu.addCommand(new RunExampleCommand("1", ex1.toString(), ctr1));
+        if (ctr2 != null) menu.addCommand(new RunExampleCommand("2", ex2.toString(), ctr2));
+        if (ctr3 != null) menu.addCommand(new RunExampleCommand("3", ex3.toString(), ctr3));
+        if (ctr4 != null) menu.addCommand(new RunExampleCommand("4", ex4.toString(), ctr4));
+        if (ctr5 != null) menu.addCommand(new RunExampleCommand("5", ex5.toString(), ctr5));
+        if (ctr6 != null) menu.addCommand(new RunExampleCommand("6", ex6.toString(), ctr6));
+        if (ctr7 != null) menu.addCommand(new RunExampleCommand("7", ex7.toString(), ctr7));
+        if (ctr8 != null) menu.addCommand(new RunExampleCommand("8", ex8.toString(), ctr8));
         menu.show();
     }
 }

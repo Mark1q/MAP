@@ -3,6 +3,7 @@ package model.statement;
 import model.PrgState;
 import model.adt.MyIStack;
 import model.adt.MyIDictionary;
+import model.type.Type;
 import exception.MyException;
 
 public class ForkStmt implements IStmt {
@@ -29,6 +30,12 @@ public class ForkStmt implements IStmt {
         );
 
         return childState;
+    }
+
+    @Override
+    public MyIDictionary<String, Type> typecheck(MyIDictionary<String, Type> typeEnv) throws MyException {
+        statement.typecheck(typeEnv.deepCopy());
+        return typeEnv;
     }
 
     @Override

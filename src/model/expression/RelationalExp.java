@@ -6,6 +6,8 @@ import model.value.BoolValue;
 import model.adt.MyIDictionary;
 import model.adt.MyIHeap;
 import model.type.IntType;
+import model.type.BoolType;
+import model.type.Type;
 import exception.MyException;
 
 public class RelationalExp implements Exp {
@@ -43,6 +45,20 @@ public class RelationalExp implements Exp {
             case ">=": return new BoolValue(n1 >= n2);
             default: throw new MyException("Invalid relational operator");
         }
+    }
+
+    @Override
+    public Type typecheck(MyIDictionary<String, Type> typeEnv) throws MyException {
+        Type typ1 = e1.typecheck(typeEnv);
+        Type typ2 = e2.typecheck(typeEnv);
+
+        if (typ1.equals(new IntType())) {
+            if (typ2.equals(new IntType())) {
+                return new BoolType();
+            } else
+                throw new MyException("Second operand is not an integer");
+        } else
+            throw new MyException("First operand is not an integer");
     }
 
     @Override
