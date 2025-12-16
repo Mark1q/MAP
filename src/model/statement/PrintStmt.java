@@ -23,6 +23,6 @@ public class PrintStmt implements IStmt {
         MyIList<Value> out = state.getOut();
         Value val = exp.eval(state.getSymTable(), state.getHeap());
         out.add(val);
-        return state;
+        return null;
     }
 }

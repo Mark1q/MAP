@@ -37,6 +37,6 @@ public class AssignStmt implements IStmt {
             throw new MyException("Type of variable " + id + " and assigned expression do not match");
 
         symTbl.update(id, val);
-        return state;
+        return null;
     }
 }

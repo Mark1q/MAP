@@ -38,6 +38,6 @@ public class CloseRFileStmt implements IStmt {
             throw new MyException("Error closing file: " + e.getMessage());
         }
 
-        return state;
+        return null;
     }
 }

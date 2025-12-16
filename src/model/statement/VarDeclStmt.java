@@ -27,6 +27,6 @@ public class VarDeclStmt implements IStmt {
 
         symTbl.put(name, typ.defaultValue());
 
-        return state;
+        return null;
     }
 }

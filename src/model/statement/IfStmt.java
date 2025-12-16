@@ -39,6 +39,6 @@ public class IfStmt implements IStmt {
         else
             stk.push(elseS);
 
-        return state;
+        return null;
     }
 }

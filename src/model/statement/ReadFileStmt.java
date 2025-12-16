@@ -54,6 +54,6 @@ public class ReadFileStmt implements IStmt {
             throw new MyException("Error reading file: " + e.getMessage());
         }
 
-        return state;
+        return null;
     }
 }

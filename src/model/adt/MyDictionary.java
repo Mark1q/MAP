@@ -12,6 +12,11 @@ public class MyDictionary<K, V> implements MyIDictionary<K, V> {
         dictionary = new HashMap<>();
     }
 
+    // NEW CONSTRUCTOR for deep copy
+    private MyDictionary(HashMap<K, V> dictionary) {
+        this.dictionary = dictionary;
+    }
+
     @Override
     public void put(K key, V value) {
         dictionary.put(key, value);
@@ -51,6 +56,12 @@ public class MyDictionary<K, V> implements MyIDictionary<K, V> {
     @Override
     public Map<K, V> getContent() {
         return dictionary;
+    }
+
+    @Override
+    public MyIDictionary<K, V> deepCopy() {
+        HashMap<K, V> newDict = new HashMap<>(dictionary);
+        return new MyDictionary<K, V>(newDict);
     }
 
     @Override

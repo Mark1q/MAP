@@ -30,7 +30,7 @@ public class WhileStmt implements IStmt {
             state.getStk().push(statement);
         }
 
-        return state;
+        return null;
     }
 
     @Override

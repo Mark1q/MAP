@@ -34,7 +34,7 @@ public class NewStmt implements IStmt {
         int newAddress = state.getHeap().allocate(expValue);
         state.getSymTable().update(varName, new RefValue(newAddress, refValue.getLocationType()));
 
-        return state;
+        return null;
     }
 
     @Override

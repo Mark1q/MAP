@@ -18,9 +18,8 @@ public class CompStmt implements IStmt {
     }
 
     public PrgState execute(PrgState state) throws MyException {
-        MyIStack<IStmt> stk = state.getStk();
-        stk.push(snd);
-        stk.push(first);
-        return state;
+        state.getStk().push(snd);
+        state.getStk().push(first);
+        return null;
     }
 }

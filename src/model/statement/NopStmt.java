@@ -7,6 +7,6 @@ public class NopStmt implements IStmt {
     public String toString() { return "nop"; }
 
     public PrgState execute(PrgState state) throws MyException {
-        return state;
+        return null;
     }
 }

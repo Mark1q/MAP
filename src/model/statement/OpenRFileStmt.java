@@ -42,6 +42,6 @@ public class OpenRFileStmt implements IStmt {
             throw new MyException("Error opening file: " + e.getMessage());
         }
 
-        return state;
+        return null;
     }
 }

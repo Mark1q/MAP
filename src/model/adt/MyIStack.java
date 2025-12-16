@@ -6,4 +6,5 @@ public interface MyIStack<T> {
     void push(T v);
     boolean isEmpty();
     String toString();
+    MyIStack<T> createEmpty();
 }
