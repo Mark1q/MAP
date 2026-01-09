@@ -17,6 +17,11 @@ public class Controller {
 
     public Controller(IRepository repo) {
         this.repo = repo;
+        this.executor = Executors.newFixedThreadPool(2);
+    }
+
+    public IRepository getRepo() {
+        return repo;
     }
 
     private Map<Integer, Value> safeGarbageCollector(List<Map<String, Value>> symTables, Map<Integer, Value> heap) {
@@ -59,14 +64,20 @@ public class Controller {
 
 
     public void oneStepForAllPrg(List<PrgState> allPrgList) throws MyException {
+        // Run garbage collector before execution
+        if (!allPrgList.isEmpty() && allPrgList.getFirst().getHeap() != null) {
+            List<Map<String, Value>> allSymTables = getAllSymTables(allPrgList);
+            Map<Integer, Value> heapContent = allPrgList.getFirst().getHeap().getContent();
+            Map<Integer, Value> newHeap = safeGarbageCollector(allSymTables, heapContent);
+
+            for (PrgState p : allPrgList) {
+                p.getHeap().setContent(new HashMap<>(newHeap));
+            }
+        }
+
         List<PrgState> execPrgList = allPrgList.stream()
                 .filter(PrgState::isNotCompleted)
                 .toList();
-
-        // 2. Log ONLY executable program states before execution
-//        for (PrgState p : execPrgList) {
-//            repo.logPrgStateExec(p);
-//        }
 
         List<Callable<PrgState>> callList = execPrgList.stream()
                 .map((PrgState p) -> (Callable<PrgState>)(p::oneStep))
@@ -107,7 +118,6 @@ public class Controller {
 
 
     public void allStep() throws MyException {
-        executor = Executors.newFixedThreadPool(2);
 
         try {
             List<PrgState> allPrgList = repo.getPrgList();
@@ -117,16 +127,6 @@ public class Controller {
                     .collect(Collectors.toList());
 
             while (!execPrgList.isEmpty()) {
-                if (!allPrgList.isEmpty() && allPrgList.getFirst().getHeap() != null) {
-                    List<Map<String, Value>> allSymTables = getAllSymTables(allPrgList);
-                    Map<Integer, Value> heapContent = allPrgList.getFirst().getHeap().getContent();
-                    Map<Integer, Value> newHeap = safeGarbageCollector(allSymTables, heapContent);
-
-                    for (PrgState p : allPrgList) {
-                        p.getHeap().setContent(new HashMap<>(newHeap));
-                    }
-                }
-
                 oneStepForAllPrg(allPrgList);
 
                 allPrgList = repo.getPrgList();
