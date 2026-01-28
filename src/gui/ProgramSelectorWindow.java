@@ -5,6 +5,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.VBox;
@@ -67,8 +68,12 @@ public class ProgramSelectorWindow {
                     executionWindow.show(executionStage);
 
                     stage.close();
-                } catch (MyException ex) {
-                    System.out.println("Type check error: " + ex.getMessage());
+                }  catch (MyException ex) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Type Check Error");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Type check failed: " + ex.getMessage());
+                    alert.showAndWait();
                 }
             }
         });

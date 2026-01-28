@@ -32,6 +32,7 @@ public class ExecutionWindow {
     private TableView<SymTableEntry> symTableView;
     private ListView<String> exeStackListView;
     private Button runOneStepButton;
+    private Button runAllStepsButton;  // ADDED
 
     public ExecutionWindow(Controller controller) {
         this.controller = controller;
@@ -119,12 +120,14 @@ public class ExecutionWindow {
         centerSplit.getItems().addAll(leftBox, rightBox);
         centerSplit.setDividerPositions(0.5);
 
-        // Bottom: Run One Step button
+        // Bottom: Run One Step and Run All Steps buttons
         HBox bottomBox = new HBox(10);
         bottomBox.setPadding(new Insets(5));
         runOneStepButton = new Button("Run One Step");
         runOneStepButton.setOnAction(e -> runOneStep());
-        bottomBox.getChildren().add(runOneStepButton);
+        runAllStepsButton = new Button("Run All Steps");  // ADDED
+        runAllStepsButton.setOnAction(e -> runAllSteps());  // ADDED
+        bottomBox.getChildren().addAll(runOneStepButton, runAllStepsButton);  // MODIFIED
 
         mainLayout.setTop(topBox);
         mainLayout.setCenter(centerSplit);
@@ -153,6 +156,7 @@ public class ExecutionWindow {
                 alert.setContentText("Program execution has completed!");
                 alert.showAndWait();
                 runOneStepButton.setDisable(true);
+                runAllStepsButton.setDisable(true);  // ADDED
             }
         } catch (MyException e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -161,6 +165,64 @@ public class ExecutionWindow {
             alert.setContentText("Error: " + e.getMessage());
             alert.showAndWait();
         }
+    }
+
+    // Run All Steps
+    private void runAllSteps() {
+        // Disable both buttons during execution
+        runOneStepButton.setDisable(true);
+        runAllStepsButton.setDisable(true);
+
+        // Create a new thread to avoid blocking the UI
+        Thread executionThread = new Thread(() -> {
+            try {
+                List<PrgState> allPrgList = controller.getRepo().getPrgList();
+
+                while (allPrgList.stream().anyMatch(PrgState::isNotCompleted)) {
+                    controller.oneStepForAllPrg(allPrgList);
+
+                    // Update UI on JavaFX Application Thread
+                    javafx.application.Platform.runLater(() -> updateAll());
+
+                    // Small delay to see the execution steps
+                    Thread.sleep(50);
+
+                    // Refresh the list
+                    allPrgList = controller.getRepo().getPrgList();
+                }
+
+                // Show completion message on JavaFX Application Thread
+                javafx.application.Platform.runLater(() -> {
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Execution Complete");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Program execution has completed!");
+                    alert.showAndWait();
+                    runOneStepButton.setDisable(true);
+                    runAllStepsButton.setDisable(true);
+                });
+
+            } catch (MyException e) {
+                // Show error on JavaFX Application Thread
+                javafx.application.Platform.runLater(() -> {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Execution Error");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Error: " + e.getMessage());
+                    alert.showAndWait();
+                    runOneStepButton.setDisable(false);
+                    runAllStepsButton.setDisable(false);
+                });
+            } catch (InterruptedException e) {
+                javafx.application.Platform.runLater(() -> {
+                    runOneStepButton.setDisable(false);
+                    runAllStepsButton.setDisable(false);
+                });
+            }
+        });
+
+        executionThread.setDaemon(true);
+        executionThread.start();
     }
 
     private void updateAll() {
