@@ -26,6 +26,7 @@ public class ForkStmt implements IStmt {
                 state.getOut(),
                 state.getFileTable(),
                 state.getHeap(),
+                state.getSemaphoreTable(),  // Shared semaphore table
                 PrgState.generateId()
         );
 

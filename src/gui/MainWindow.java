@@ -186,6 +186,102 @@ public class MainWindow extends Application {
         );
         programs.add(ex8);
 
+        IStmt ex9 = new CompStmt(
+                new VarDeclStmt("a", new IntType()),
+                new CompStmt(
+                        new VarDeclStmt("b", new IntType()),
+                        new CompStmt(
+                                new VarDeclStmt("c", new IntType()),
+                                new CompStmt(
+                                        new AssignStmt("a", new ValueExp(new IntValue(1))),
+                                        new CompStmt(
+                                                new AssignStmt("b", new ValueExp(new IntValue(2))),
+                                                new CompStmt(
+                                                        new AssignStmt("c", new ValueExp(new IntValue(5))),
+                                                        new CompStmt(
+                                                                new SwitchStmt(new ArithExp('*', new VarExp("a"), new ValueExp(new IntValue(10))),
+                                                                        new ArithExp('*', new VarExp("b"), new VarExp("c")),
+                                                                        new ValueExp(new IntValue(10)),
+                                                                        new CompStmt(
+                                                                                new PrintStmt(new VarExp("a")),
+                                                                                new PrintStmt(new VarExp("b"))
+                                                                        ),
+                                                                        new CompStmt(
+                                                                                new PrintStmt(new ValueExp(new IntValue(100))),
+                                                                                new PrintStmt(new ValueExp(new IntValue(200)))
+                                                                        ),
+                                                                        new PrintStmt(new ValueExp(new IntValue(300)))),
+                                                                new PrintStmt(new ValueExp(new IntValue(300)))
+                                                        )
+                                                )
+                                        )
+                                )
+                        )
+                )
+        );
+        programs.add(ex9);
+
+        IStmt ex10 = new CompStmt(
+                new VarDeclStmt("v1", new RefType(new IntType())),
+                new CompStmt(
+                        new VarDeclStmt("cnt", new IntType()),
+                        new CompStmt(
+                                new NewStmt("v1", new ValueExp(new IntValue(1))),
+                                new CompStmt(
+                                        new CreateSemaphoreStmt("cnt", new ReadHeapExp(new VarExp("v1"))),
+                                        new CompStmt(
+                                                new ForkStmt(
+                                                        new CompStmt(
+                                                                new AcquireStmt("cnt"),
+                                                                new CompStmt(
+                                                                        new WriteHeapStmt("v1", new ArithExp('*',
+                                                                                new ReadHeapExp(new VarExp("v1")),
+                                                                                new ValueExp(new IntValue(10)))),
+                                                                        new CompStmt(
+                                                                                new PrintStmt(new ReadHeapExp(new VarExp("v1"))),
+                                                                                new ReleaseStmt("cnt")
+                                                                        )
+                                                                )
+                                                        )
+                                                ),
+                                                new CompStmt(
+                                                        new ForkStmt(
+                                                                new CompStmt(
+                                                                        new AcquireStmt("cnt"),
+                                                                        new CompStmt(
+                                                                                new WriteHeapStmt("v1", new ArithExp('*',
+                                                                                        new ReadHeapExp(new VarExp("v1")),
+                                                                                        new ValueExp(new IntValue(10)))),
+                                                                                new CompStmt(
+                                                                                        new WriteHeapStmt("v1", new ArithExp('*',
+                                                                                                new ReadHeapExp(new VarExp("v1")),
+                                                                                                new ValueExp(new IntValue(2)))),
+                                                                                        new CompStmt(
+                                                                                                new PrintStmt(new ReadHeapExp(new VarExp("v1"))),
+                                                                                                new ReleaseStmt("cnt")
+                                                                                        )
+                                                                                )
+                                                                        )
+                                                                )
+                                                        ),
+                                                        new CompStmt(
+                                                                new AcquireStmt("cnt"),
+                                                                new CompStmt(
+                                                                        new PrintStmt(new ArithExp('-',
+                                                                                new ReadHeapExp(new VarExp("v1")),
+                                                                                new ValueExp(new IntValue(1)))),
+                                                                        new ReleaseStmt("cnt")
+                                                                )
+                                                        )
+                                                )
+                                        )
+                                )
+                        )
+                )
+        );
+
+        programs.add(ex10);
+
         return programs;
     }
 

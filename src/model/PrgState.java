@@ -1,11 +1,7 @@
 package model;
 
 import exception.MyException;
-import model.adt.MyIStack;
-import model.adt.MyIDictionary;
-import model.adt.MyIList;
-import model.adt.MyIFileTable;
-import model.adt.MyIHeap;
+import model.adt.*;
 import model.statement.IStmt;
 import model.value.Value;
 import model.value.StringValue;
@@ -17,6 +13,7 @@ public class PrgState {
     private MyIList<Value> out;
     private MyIFileTable<StringValue, BufferedReader> fileTable;
     private MyIHeap<Integer, Value> heap;
+    private MyISemaphoreTable semaphoreTable;
     private int id;
     private static int nextId = 1;  // Static counter
 
@@ -25,27 +22,30 @@ public class PrgState {
         return nextId++;
     }
 
-    // Regular constructor
+    // Regular constructor with semaphore table
     public PrgState(MyIStack<IStmt> stk, MyIDictionary<String, Value> symtbl,
                     MyIList<Value> out, MyIFileTable<StringValue, BufferedReader> fileTable,
-                    MyIHeap<Integer, Value> heap, IStmt prg) {
+                    MyIHeap<Integer, Value> heap, MyISemaphoreTable semaphoreTable, IStmt prg) {
         this.exeStack = stk;
         this.symTable = symtbl;
         this.out = out;
         this.fileTable = fileTable;
         this.heap = heap;
+        this.semaphoreTable = semaphoreTable;
         this.id = generateId();
         stk.push(prg);
     }
 
+    // Constructor for fork (with existing ID)
     public PrgState(MyIStack<IStmt> stk, MyIDictionary<String, Value> symtbl,
                     MyIList<Value> out, MyIFileTable<StringValue, BufferedReader> fileTable,
-                    MyIHeap<Integer, Value> heap, int id) {
+                    MyIHeap<Integer, Value> heap, MyISemaphoreTable semaphoreTable, int id) {
         this.exeStack = stk;
         this.symTable = symtbl;
         this.out = out;
         this.fileTable = fileTable;
         this.heap = heap;
+        this.semaphoreTable = semaphoreTable;
         this.id = id;
     }
 
@@ -67,6 +67,7 @@ public class PrgState {
     public MyIList<Value> getOut() { return out; }
     public MyIFileTable<StringValue, BufferedReader> getFileTable() { return fileTable; }
     public MyIHeap<Integer, Value> getHeap() { return heap; }
+    public MyISemaphoreTable getSemaphoreTable() { return semaphoreTable; }
 
     @Override
     public String toString() {
@@ -76,6 +77,7 @@ public class PrgState {
                 "\nOut:\n" + out.toString() +
                 "\nFileTable:\n" + fileTable.toString() +
                 "\nHeap:\n" + heap.toString() +
+                "\nSemaphoreTable:\n" + semaphoreTable.toString() +
                 "\n========================================\n";
     }
 
@@ -87,6 +89,7 @@ public class PrgState {
         sb.append("Out:\n").append(out.toString());
         sb.append("FileTable:\n").append(fileTable.toString());
         sb.append("Heap:\n").append(heap.toString());
+        sb.append("SemaphoreTable:\n").append(semaphoreTable.toString());
         sb.append("========================================\n");
         return sb.toString();
     }

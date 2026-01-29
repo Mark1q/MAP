@@ -57,6 +57,7 @@ public class ProgramSelectorWindow {
                             new MyList<>(),
                             new MyFileTable<>(),
                             new MyHeap<>(),
+                            new MySemaphoreTable(),
                             selectedProgram
                     );
                     IRepository repo = new Repository(prgState, "log" + (selectedIndex + 1) + ".txt");

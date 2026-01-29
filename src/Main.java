@@ -19,7 +19,8 @@ public class Main {
             System.out.println("Program passed type checking!");
 
             PrgState prgState = new PrgState(new MyStack<>(), new MyDictionary<>(),
-                    new MyList<>(), new MyFileTable<>(), new MyHeap<>(), program);
+                    new MyList<>(), new MyFileTable<>(), new MyHeap<>(),
+                    new MySemaphoreTable(), program);
             IRepository repo = new Repository(prgState, logFile);
             return new Controller(repo);
         } catch (MyException e) {
@@ -197,6 +198,101 @@ public class Main {
         );
         Controller ctr8 = createController(ex8, "log8.txt");
 
+        IStmt ex9 = new CompStmt(
+                new VarDeclStmt("a", new IntType()),
+                new CompStmt(
+                        new VarDeclStmt("b", new IntType()),
+                        new CompStmt(
+                            new VarDeclStmt("c", new IntType()),
+                                new CompStmt(
+                                        new AssignStmt("a", new ValueExp(new IntValue(1))),
+                                        new CompStmt(
+                                                new AssignStmt("b", new ValueExp(new IntValue(2))),
+                                                new CompStmt(
+                                                        new AssignStmt("c", new ValueExp(new IntValue(5))),
+                                                        new CompStmt(
+                                                            new SwitchStmt(new ArithExp('*', new VarExp("a"), new ValueExp(new IntValue(10))),
+                                                                    new ArithExp('*', new VarExp("b"), new VarExp("c")),
+                                                                    new ValueExp(new IntValue(10)),
+                                                                    new CompStmt(
+                                                                            new PrintStmt(new VarExp("a")),
+                                                                            new PrintStmt(new VarExp("b"))
+                                                                    ),
+                                                                    new CompStmt(
+                                                                            new PrintStmt(new ValueExp(new IntValue(100))),
+                                                                            new PrintStmt(new ValueExp(new IntValue(200)))
+                                                                    ),
+                                                                    new PrintStmt(new ValueExp(new IntValue(300)))),
+                                                            new PrintStmt(new ValueExp(new IntValue(300)))
+                                                        )
+                                                )
+                                        )
+                                )
+                        )
+                )
+        );
+        Controller ctr9 = createController(ex9, "log9.txt");
+
+        IStmt ex10 = new CompStmt(
+                new VarDeclStmt("v1", new RefType(new IntType())),
+                new CompStmt(
+                        new VarDeclStmt("cnt", new IntType()),
+                        new CompStmt(
+                                new NewStmt("v1", new ValueExp(new IntValue(1))),
+                                new CompStmt(
+                                        new CreateSemaphoreStmt("cnt", new ReadHeapExp(new VarExp("v1"))),
+                                        new CompStmt(
+                                                new ForkStmt(
+                                                        new CompStmt(
+                                                                new AcquireStmt("cnt"),
+                                                                new CompStmt(
+                                                                        new WriteHeapStmt("v1", new ArithExp('*',
+                                                                                new ReadHeapExp(new VarExp("v1")),
+                                                                                new ValueExp(new IntValue(10)))),
+                                                                        new CompStmt(
+                                                                                new PrintStmt(new ReadHeapExp(new VarExp("v1"))),
+                                                                                new ReleaseStmt("cnt")
+                                                                        )
+                                                                )
+                                                        )
+                                                ),
+                                                new CompStmt(
+                                                        new ForkStmt(
+                                                                new CompStmt(
+                                                                        new AcquireStmt("cnt"),
+                                                                        new CompStmt(
+                                                                                new WriteHeapStmt("v1", new ArithExp('*',
+                                                                                        new ReadHeapExp(new VarExp("v1")),
+                                                                                        new ValueExp(new IntValue(10)))),
+                                                                                new CompStmt(
+                                                                                        new WriteHeapStmt("v1", new ArithExp('*',
+                                                                                                new ReadHeapExp(new VarExp("v1")),
+                                                                                                new ValueExp(new IntValue(2)))),
+                                                                                        new CompStmt(
+                                                                                                new PrintStmt(new ReadHeapExp(new VarExp("v1"))),
+                                                                                                new ReleaseStmt("cnt")
+                                                                                        )
+                                                                                )
+                                                                        )
+                                                                )
+                                                        ),
+                                                        new CompStmt(
+                                                                new AcquireStmt("cnt"),
+                                                                new CompStmt(
+                                                                        new PrintStmt(new ArithExp('-',
+                                                                                new ReadHeapExp(new VarExp("v1")),
+                                                                                new ValueExp(new IntValue(1)))),
+                                                                        new ReleaseStmt("cnt")
+                                                                )
+                                                        )
+                                                )
+                                        )
+                                )
+                        )
+                )
+        );
+        Controller ctr10 = createController(ex10, "log10.txt");
+
         TextMenu menu = new TextMenu();
         menu.addCommand(new ExitCommand("0", "exit"));
         if (ctr1 != null) menu.addCommand(new RunExampleCommand("1", ex1.toString(), ctr1));
@@ -207,6 +303,8 @@ public class Main {
         if (ctr6 != null) menu.addCommand(new RunExampleCommand("6", ex6.toString(), ctr6));
         if (ctr7 != null) menu.addCommand(new RunExampleCommand("7", ex7.toString(), ctr7));
         if (ctr8 != null) menu.addCommand(new RunExampleCommand("8", ex8.toString(), ctr8));
+        if (ctr9 != null) menu.addCommand(new RunExampleCommand("9", ex9.toString(), ctr9));
+        if (ctr10 != null) menu.addCommand(new RunExampleCommand("10", ex10.toString(), ctr10));
         menu.show();
     }
 }

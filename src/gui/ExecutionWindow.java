@@ -10,15 +10,13 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import javafx.util.Pair;
 import model.PrgState;
-import model.statement.IStmt;
 import model.value.Value;
 import exception.MyException;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class ExecutionWindow {
     private Controller controller;
@@ -31,8 +29,9 @@ public class ExecutionWindow {
     private ListView<Integer> prgStateIdListView;
     private TableView<SymTableEntry> symTableView;
     private ListView<String> exeStackListView;
+    private TableView<SemaphoreEntry> semaphoreTableView;
     private Button runOneStepButton;
-    private Button runAllStepsButton;  // ADDED
+    private Button runAllStepsButton;
 
     public ExecutionWindow(Controller controller) {
         this.controller = controller;
@@ -54,7 +53,7 @@ public class ExecutionWindow {
         // Center: Split into left and right
         SplitPane centerSplit = new SplitPane();
 
-        // Left side: Heap, Out, FileTable, PrgState IDs
+        // Left side: Heap, Out, FileTable, PrgState IDs, SemaphoreTable
         VBox leftBox = new VBox(10);
         leftBox.setPadding(new Insets(5));
 
@@ -66,22 +65,34 @@ public class ExecutionWindow {
         TableColumn<HeapEntry, String> valueCol = new TableColumn<>("Value");
         valueCol.setCellValueFactory(data -> data.getValue().valueProperty());
         heapTableView.getColumns().addAll(addressCol, valueCol);
-        heapTableView.setPrefHeight(150);
+        heapTableView.setPrefHeight(120);
 
         // Out List
         Label outLabel = new Label("Output:");
         outListView = new ListView<>();
-        outListView.setPrefHeight(100);
+        outListView.setPrefHeight(80);
 
         // FileTable List
         Label fileTableLabel = new Label("File Table:");
         fileTableListView = new ListView<>();
-        fileTableListView.setPrefHeight(80);
+        fileTableListView.setPrefHeight(60);
+
+        // Semaphore Table
+        Label semaphoreLabel = new Label("Semaphore Table:");
+        semaphoreTableView = new TableView<>();
+        TableColumn<SemaphoreEntry, Integer> semIndexCol = new TableColumn<>("Index");
+        semIndexCol.setCellValueFactory(data -> data.getValue().indexProperty().asObject());
+        TableColumn<SemaphoreEntry, Integer> semValueCol = new TableColumn<>("Value");
+        semValueCol.setCellValueFactory(data -> data.getValue().valueProperty().asObject());
+        TableColumn<SemaphoreEntry, String> semListCol = new TableColumn<>("List");
+        semListCol.setCellValueFactory(data -> data.getValue().listProperty());
+        semaphoreTableView.getColumns().addAll(semIndexCol, semValueCol, semListCol);
+        semaphoreTableView.setPrefHeight(120);
 
         // PrgState IDs List
         Label prgStateIdsLabel = new Label("PrgState IDs:");
         prgStateIdListView = new ListView<>();
-        prgStateIdListView.setPrefHeight(80);
+        prgStateIdListView.setPrefHeight(60);
         prgStateIdListView.getSelectionModel().selectedItemProperty().addListener(
                 (obs, oldVal, newVal) -> updateSelectedPrgState(newVal)
         );
@@ -90,6 +101,7 @@ public class ExecutionWindow {
                 heapLabel, heapTableView,
                 outLabel, outListView,
                 fileTableLabel, fileTableListView,
+                semaphoreLabel, semaphoreTableView,
                 prgStateIdsLabel, prgStateIdListView
         );
 
@@ -105,12 +117,12 @@ public class ExecutionWindow {
         TableColumn<SymTableEntry, String> varValueCol = new TableColumn<>("Value");
         varValueCol.setCellValueFactory(data -> data.getValue().valueProperty());
         symTableView.getColumns().addAll(varNameCol, varValueCol);
-        symTableView.setPrefHeight(200);
+        symTableView.setPrefHeight(250);
 
         // ExeStack
         Label exeStackLabel = new Label("Execution Stack:");
         exeStackListView = new ListView<>();
-        exeStackListView.setPrefHeight(200);
+        exeStackListView.setPrefHeight(250);
 
         rightBox.getChildren().addAll(
                 symTableLabel, symTableView,
@@ -125,15 +137,15 @@ public class ExecutionWindow {
         bottomBox.setPadding(new Insets(5));
         runOneStepButton = new Button("Run One Step");
         runOneStepButton.setOnAction(e -> runOneStep());
-        runAllStepsButton = new Button("Run All Steps");  // ADDED
-        runAllStepsButton.setOnAction(e -> runAllSteps());  // ADDED
-        bottomBox.getChildren().addAll(runOneStepButton, runAllStepsButton);  // MODIFIED
+        runAllStepsButton = new Button("Run All Steps");
+        runAllStepsButton.setOnAction(e -> runAllSteps());
+        bottomBox.getChildren().addAll(runOneStepButton, runAllStepsButton);
 
         mainLayout.setTop(topBox);
         mainLayout.setCenter(centerSplit);
         mainLayout.setBottom(bottomBox);
 
-        Scene scene = new Scene(mainLayout, 1200, 700);
+        Scene scene = new Scene(mainLayout, 1400, 800);
         stage.setTitle("Program Execution");
         stage.setScene(scene);
         stage.show();
@@ -156,7 +168,7 @@ public class ExecutionWindow {
                 alert.setContentText("Program execution has completed!");
                 alert.showAndWait();
                 runOneStepButton.setDisable(true);
-                runAllStepsButton.setDisable(true);  // ADDED
+                runAllStepsButton.setDisable(true);
             }
         } catch (MyException e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -167,31 +179,21 @@ public class ExecutionWindow {
         }
     }
 
-    // Run All Steps
     private void runAllSteps() {
-        // Disable both buttons during execution
         runOneStepButton.setDisable(true);
         runAllStepsButton.setDisable(true);
 
-        // Create a new thread to avoid blocking the UI
         Thread executionThread = new Thread(() -> {
             try {
                 List<PrgState> allPrgList = controller.getRepo().getPrgList();
 
                 while (allPrgList.stream().anyMatch(PrgState::isNotCompleted)) {
                     controller.oneStepForAllPrg(allPrgList);
-
-                    // Update UI on JavaFX Application Thread
                     javafx.application.Platform.runLater(() -> updateAll());
-
-                    // Small delay to see the execution steps
                     Thread.sleep(50);
-
-                    // Refresh the list
                     allPrgList = controller.getRepo().getPrgList();
                 }
 
-                // Show completion message on JavaFX Application Thread
                 javafx.application.Platform.runLater(() -> {
                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
                     alert.setTitle("Execution Complete");
@@ -203,7 +205,6 @@ public class ExecutionWindow {
                 });
 
             } catch (MyException e) {
-                // Show error on JavaFX Application Thread
                 javafx.application.Platform.runLater(() -> {
                     Alert alert = new Alert(Alert.AlertType.ERROR);
                     alert.setTitle("Execution Error");
@@ -228,20 +229,20 @@ public class ExecutionWindow {
     private void updateAll() {
         List<PrgState> prgList = controller.getRepo().getPrgList();
 
-        // Update PrgState count
         prgStateCountField.setText(String.valueOf(prgList.size()));
 
         if (prgList.isEmpty()) {
             heapTableView.setItems(FXCollections.observableArrayList());
             outListView.setItems(FXCollections.observableArrayList());
             fileTableListView.setItems(FXCollections.observableArrayList());
+            semaphoreTableView.setItems(FXCollections.observableArrayList());
             prgStateIdListView.setItems(FXCollections.observableArrayList());
             symTableView.setItems(FXCollections.observableArrayList());
             exeStackListView.setItems(FXCollections.observableArrayList());
             return;
         }
 
-        PrgState firstState = prgList.getFirst();
+        PrgState firstState = prgList.get(0);
 
         // Update Heap
         ObservableList<HeapEntry> heapEntries = FXCollections.observableArrayList();
@@ -277,6 +278,18 @@ public class ExecutionWindow {
         }
         fileTableListView.setItems(fileItems);
 
+        // Update SemaphoreTable
+        ObservableList<SemaphoreEntry> semaphoreEntries = FXCollections.observableArrayList();
+        Map<Integer, Pair<Integer, List<Integer>>> semaphoreContent = firstState.getSemaphoreTable().getContent();
+        for (Map.Entry<Integer, Pair<Integer, List<Integer>>> entry : semaphoreContent.entrySet()) {
+            semaphoreEntries.add(new SemaphoreEntry(
+                    entry.getKey(),
+                    entry.getValue().getKey(),
+                    entry.getValue().getValue().toString()
+            ));
+        }
+        semaphoreTableView.setItems(semaphoreEntries);
+
         // Update PrgState IDs
         ObservableList<Integer> idItems = FXCollections.observableArrayList();
         for (PrgState state : prgList) {
@@ -284,7 +297,6 @@ public class ExecutionWindow {
         }
         prgStateIdListView.setItems(idItems);
 
-        // Select first ID if available
         if (!idItems.isEmpty() && prgStateIdListView.getSelectionModel().getSelectedItem() == null) {
             prgStateIdListView.getSelectionModel().selectFirst();
         }
@@ -352,5 +364,21 @@ public class ExecutionWindow {
 
         public SimpleStringProperty nameProperty() { return name; }
         public SimpleStringProperty valueProperty() { return value; }
+    }
+
+    public static class SemaphoreEntry {
+        private final SimpleIntegerProperty index;
+        private final SimpleIntegerProperty value;
+        private final SimpleStringProperty list;
+
+        public SemaphoreEntry(int index, int value, String list) {
+            this.index = new SimpleIntegerProperty(index);
+            this.value = new SimpleIntegerProperty(value);
+            this.list = new SimpleStringProperty(list);
+        }
+
+        public SimpleIntegerProperty indexProperty() { return index; }
+        public SimpleIntegerProperty valueProperty() { return value; }
+        public SimpleStringProperty listProperty() { return list; }
     }
 }
